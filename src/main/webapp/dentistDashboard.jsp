@@ -5,7 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="Libraries.User"%>
+<%@page import="Models.User"%>
 <%
     // Session Verification Guard
     User user = (User) session.getAttribute("user");
@@ -227,7 +227,12 @@
                                 <td>10:30 AM</td>
                                 <td><span class="badge badge-scheduled px-3 py-2 rounded-pill">Scheduled</span></td>
                                 <td class="text-end">
-                                    <button class="btn btn-sm btn-primary-custom shadow-sm me-1" data-bs-toggle="modal" data-bs-target="#addRecordModal">
+                                    <button class="btn btn-sm btn-primary-custom shadow-sm me-1 btn-add-record" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#addRecordModal"
+                                            data-appt-id="101"
+                                            data-patient-id="1"
+                                            data-patient-name="Kamal Perera">
                                         <i class="fa-solid fa-notes-medical me-1"></i> Add Record
                                     </button>
                                 </td>
@@ -239,7 +244,7 @@
                                 <td>11:15 AM</td>
                                 <td><span class="badge badge-completed px-3 py-2 rounded-pill">Completed</span></td>
                                 <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-secondary rounded-2" data-bs-toggle="modal" data-bs-target="#viewRecordModal">
+                                    <button class="btn btn-sm btn-outline-secondary rounded-2">
                                         <i class="fa-solid fa-eye me-1"></i> View Record
                                     </button>
                                 </td>
@@ -254,7 +259,7 @@
         <div class="tab-pane fade" id="records" role="tabpanel">
             <div class="card card-custom p-3 border-0">
                 <div class="d-flex justify-content-between mb-3">
-                    <input type="text" class="form-control w-25" placeholder="Search by Patient name or Appt ID...">
+                    <input type="text" id="searchInput" class="form-control w-25" placeholder="Search by Patient name or Appt ID...">
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover table-custom align-middle mb-0">
@@ -276,7 +281,11 @@
                                 <td>Mild Enamel Staining</td>
                                 <td>2026-09-15</td>
                                 <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-primary rounded-2"><i class="fa-solid fa-print"></i> Print Prescription</button>
+                                    <button class="btn btn-sm btn-outline-primary rounded-2" 
+        onclick="openPrintModal('APT-102', 'Nimali Fernando', 'Mild Enamel Staining', 'Amoxicillin 500mg - 1bd x 5 days')">
+    <i class="fa-solid fa-print"></i> Print Prescription
+</button>
+                                    
                                 </td>
                             </tr>
                         </tbody>
@@ -288,7 +297,7 @@
     </div>
 </div>
 
-<!-- Modal 1: Add Treatment Record -->
+<!-- Modal: Add Treatment Record -->
 <div class="modal fade" id="addRecordModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content rounded-4 border-0">
@@ -298,14 +307,14 @@
             </div>
             <form action="TreatmentRecordServlet" method="POST">
                 <div class="modal-body py-4">
-                    <input type="hidden" name="appointmentId" value="101">
-                    <input type="hidden" name="patientId" value="1">
-                    <input type="hidden" name="dentistId" value="1">
+                    <input type="hidden" name="appointmentId" id="modalApptId">
+                    <input type="hidden" name="patientId" id="modalPatientId">
+                    <input type="hidden" name="dentistId" value="<%= user.getUserId() != 0 ? user.getUserId() : 1 %>">
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Patient Name</label>
-                            <input type="text" class="form-control bg-light rounded-3" value="Kamal Perera" readonly>
+                            <input type="text" id="modalPatientName" class="form-control bg-light rounded-3" readonly>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Follow-up Date (Optional)</label>
@@ -319,12 +328,12 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Treatment Performed / Notes</label>
+                        <label class="form-label fw-semibold">Notes</label>
                         <textarea name="treatmentNotes" class="form-control rounded-3" rows="3" placeholder="e.g. Performed composite filling and scaling..." required></textarea>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Prescription / Medication Details</label>
+                        <label class="form-label fw-semibold">Medication Details</label>
                         <textarea name="prescription" class="form-control rounded-3" rows="2" placeholder="e.g. Amoxicillin 500mg - 1bd x 5 days..."></textarea>
                     </div>
                 </div>
@@ -338,7 +347,89 @@
 </div>
 
 <!-- Bootstrap 5 JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Populate modal inputs dynamically when clicking "Add Record"
+    document.addEventListener('DOMContentLoaded', function () {
+        const addRecordModal = document.getElementById('addRecordModal');
+        addRecordModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            
+            const apptId = button.getAttribute('data-appt-id');
+            const patientId = button.getAttribute('data-patient-id');
+            const patientName = button.getAttribute('data-patient-name');
+
+            document.getElementById('modalApptId').value = apptId;
+            document.getElementById('modalPatientId').value = patientId;
+            document.getElementById('modalPatientName').value = patientName;
+        });
+    });
+</script>
+<!-- Modal: View & Print Prescription -->
+<div class="modal fade" id="viewPrescriptionModal" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-body p-4" id="printablePrescription">
+                <!-- Prescription Header -->
+                <div class="text-center border-bottom pb-3 mb-3">
+                    <h4 class="fw-bold text-primary mb-1"><i class="fa-solid fa-tooth me-2"></i>Sunrise Dental Clinic</h4>
+                    <p class="text-muted small mb-0">Medical Prescription & Treatment Summary</p>
+                </div>
+
+                <!-- Details -->
+                <div class="row g-2 mb-3 small">
+                    <div class="col-6"><strong>Patient:</strong> <span id="pName">-</span></div>
+                    <div class="col-6 text-end"><strong>Appt ID:</strong> #<span id="pApptId">-</span></div>
+                    <div class="col-6"><strong>Date:</strong> <span id="pDate"><%= new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()) %></span></div>
+                    <div class="col-6 text-end"><strong>Doctor ID:</strong> <span id="pDoctor"><%= user.getUserId() %></span></div>
+                </div>
+
+                <div class="border rounded-3 p-3 bg-light mb-3">
+                    <h6 class="fw-bold text-dark mb-1">Diagnosis</h6>
+                    <p class="small text-muted mb-0" id="pDiagnosis">-</p>
+                </div>
+
+                <div class="border rounded-3 p-3 bg-light mb-3">
+                    <h6 class="fw-bold text-dark mb-1">Prescription / Medication</h6>
+                    <p class="small text-muted mb-0" id="pPrescription">-</p>
+                </div>
+
+                <div class="text-center pt-2">
+                    <small class="text-muted">Thank you for visiting Sunrise Dental Clinic!</small>
+                </div>
+            </div>
+            
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary-custom" onclick="printPrescription()"><i class="fa-solid fa-print me-1"></i> Print / Save as PDF</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Populate View/Print Modal
+    function openPrintModal(apptId, patientName, diagnosis, prescription) {
+        document.getElementById('pApptId').innerText = apptId;
+        document.getElementById('pName').innerText = patientName;
+        document.getElementById('pDiagnosis').innerText = diagnosis || 'N/A';
+        document.getElementById('pPrescription').innerText = prescription || 'No medication prescribed.';
+
+        var modal = new bootstrap.Modal(document.getElementById('viewPrescriptionModal'));
+        modal.show();
+    }
+
+    // Print functionality
+    function printPrescription() {
+        var printContents = document.getElementById('printablePrescription').innerHTML;
+        var originalContents = document.body.innerHTML;
+
+        document.body.innerHTML = '<div style="padding: 40px;">' + printContents + '</div>';
+        window.print();
+        document.body.innerHTML = originalContents;
+        location.reload(); // Reload to restore UI state
+    }
+</script>
 </body>
 </html>

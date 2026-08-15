@@ -1,7 +1,7 @@
-package com.mycompany.sunrise_dental_clinic;
+package Controllers;
 
-import Libraries.AuthService;
-import Libraries.User;
+import Models.User;
+import dao.UserDAO;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,25 +15,24 @@ import java.io.IOException;
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
-    private final AuthService authService = new AuthService();
+    // UserResource වෙනුවට UserDAO භාවිතා කරයි
+    private final UserDAO userDAO = new UserDAO();
 
     @Override
-    protected void doGet(HttpServletRequest request,
-                          HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         response.sendRedirect("login.jsp");
     }
 
     @Override
-    protected void doPost(HttpServletRequest request,
-                           HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        User user = authService.login(username, password);
+        // UserDAO එකේ authenticateUser method එක කැඳවීම
+        User user = userDAO.authenticateUser(username, password);
 
         if (user != null) {
 
@@ -45,22 +44,15 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("fullName", user.getFullName());
             session.setAttribute("role", user.getRole());
 
+            // User Role එක අනුව Dashboard එකට Redirect කිරීම
             switch (user.getRole().toUpperCase()) {
 
-                case "ADMIN":
-                    response.sendRedirect("adminDashboard.jsp");
-                    break;
-
                 case "RECEPTIONIST":
-                    response.sendRedirect("receptionistDashboard.jsp");
+                    response.sendRedirect("receptionistDashboard.jsp"); 
                     break;
 
                 case "DENTIST":
                     response.sendRedirect("dentistDashboard.jsp");
-                    break;
-
-                case "PATIENT":
-                    response.sendRedirect("patientDashboard.jsp");
                     break;
 
                 default:
@@ -69,7 +61,6 @@ public class LoginServlet extends HttpServlet {
             }
 
         } else {
-
             response.sendRedirect("login.jsp?error=invalid");
         }
     }

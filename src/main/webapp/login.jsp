@@ -122,7 +122,7 @@
             <i class="fa-solid fa-tooth"></i>
         </div>
         <h2 class="brand-title">Sunrise Dental</h2>
-        <p class="small text-white-50 mb-0 mt-1">Staff & Patient Portal Access</p>
+        <p class="small text-white-50 mb-0 mt-1">Staff Portal Access</p>
     </div>
 
     <div class="login-body">

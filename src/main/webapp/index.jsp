@@ -5,9 +5,7 @@
     if (currentUser != null) {
         String role = (String) session.getAttribute("role");
 
-        if ("ADMIN".equals(role)) {
-            dashboardLink = "adminDashboard.jsp";
-        } else if ("RECEPTIONIST".equals(role)) {
+        if ("RECEPTIONIST".equals(role)) {
             dashboardLink = "receptionistDashboard.jsp";
         } else if ("DENTIST".equals(role)) {
             dashboardLink = "dentistDashboard.jsp";
