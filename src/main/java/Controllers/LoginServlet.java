@@ -1,7 +1,9 @@
 package Controllers;
 
-import Models.User;
-import dao.UserDAO;
+import Models.Staff;
+import Models.Dentist;
+import DAO.StaffDAO;
+import DAO.DentistDAO;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,8 +17,8 @@ import java.io.IOException;
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
-    // UserResource වෙනුවට UserDAO භාවිතා කරයි
-    private final UserDAO userDAO = new UserDAO();
+    private final StaffDAO staffDAO = new StaffDAO();
+    private final DentistDAO dentistDAO = new DentistDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -31,37 +33,39 @@ public class LoginServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        // UserDAO එකේ authenticateUser method එක කැඳවීම
-        User user = userDAO.authenticateUser(username, password);
+        // 1. Staff Table එක හරහා Authenticate කිරීම (Receptionist / Admin)
+        Staff staff = staffDAO.authenticateStaff(username, password);
 
-        if (user != null) {
-
+        if (staff != null) {
             HttpSession session = request.getSession();
 
-            session.setAttribute("user", user);
-            session.setAttribute("userId", user.getUserId());
-            session.setAttribute("username", user.getUsername());
-            session.setAttribute("fullName", user.getFullName());
-            session.setAttribute("role", user.getRole());
+            session.setAttribute("loggedUser", staff);
+            session.setAttribute("staffId", staff.getStaffId());
+            session.setAttribute("username", staff.getUsername());
+            session.setAttribute("fullName", staff.getFullName());
+            session.setAttribute("role", "RECEPTIONIST");
 
-            // User Role එක අනුව Dashboard එකට Redirect කිරීම
-            switch (user.getRole().toUpperCase()) {
-
-                case "RECEPTIONIST":
-                    response.sendRedirect("receptionistDashboard.jsp"); 
-                    break;
-
-                case "DENTIST":
-                    response.sendRedirect("dentistDashboard.jsp");
-                    break;
-
-                default:
-                    response.sendRedirect("login.jsp?error=invalidrole");
-                    break;
-            }
-
-        } else {
-            response.sendRedirect("login.jsp?error=invalid");
+            response.sendRedirect("receptionistDashboard.jsp");
+            return;
         }
+
+        // 2. Staff එකේ නැත්නම් Dentists Table එක හරහා Authenticate කිරීම
+        Dentist dentist = dentistDAO.authenticateDentist(username, password);
+
+        if (dentist != null) {
+            HttpSession session = request.getSession();
+
+            session.setAttribute("loggedUser", dentist);
+            session.setAttribute("dentistId", dentist.getDentistId());
+            session.setAttribute("username", dentist.getUsername());
+            session.setAttribute("fullName", dentist.getDentistName());
+            session.setAttribute("role", "DENTIST");
+
+            response.sendRedirect("dentistDashboard.jsp");
+            return;
+        }
+
+        // 3. Tables දෙකෙන්ම User නොලැබුණු විට Error එකක් සමඟ Redirect කිරීම
+        response.sendRedirect("login.jsp?error=invalid");
     }
 }

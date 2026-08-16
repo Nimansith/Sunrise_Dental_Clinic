@@ -1,6 +1,6 @@
 package Controllers;
 
-import dao.DentistDAO;
+import DAO.DentistDAO;
 import Models.Dentist;
 
 import jakarta.servlet.ServletException;
@@ -19,39 +19,47 @@ public class RegisterDentistServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // Form එකෙන් එන Request Character Encoding එක UTF-8 කිරීම
         request.setCharacterEncoding("UTF-8");
 
         try {
-            // JSP Form එකෙන් එන Data ලබා ගැනීම
+            // Form එකෙන් Input ලබාගැනීම
             String dentistName = request.getParameter("dentistName");
             String specialization = request.getParameter("specialization");
             String contactNumber = request.getParameter("contactNumber");
             String email = request.getParameter("email");
+            String username = request.getParameter("username");
+            String password = request.getParameter("password");
 
-            // Simple Validation - Dentist Name එක හිස් නොවේ නම් පමණක් Insert කිරීම
-            if (dentistName != null && !dentistName.trim().isEmpty()) {
+            // Null Safety Wrappers
+            dentistName = (dentistName != null) ? dentistName.trim() : "";
+            specialization = (specialization != null) ? specialization.trim() : "";
+            contactNumber = (contactNumber != null) ? contactNumber.trim() : "";
+            email = (email != null) ? email.trim() : "";
+            username = (username != null) ? username.trim() : "";
+            password = (password != null) ? password.trim() : "";
+
+            // Validations - අත්‍යවශ්‍ය Inputs පරීක්ෂාව
+            if (!dentistName.isEmpty() && !username.isEmpty() && !password.isEmpty()) {
                 
-                // Model එක සාදා ගැනීම
-                Dentist dentist = new Dentist(dentistName, specialization, contactNumber, email);
-                
-                // DAO එක හරහා Database එකට Save කිරීම
-                boolean success = dentistDAO.registerDentist(dentist);
+                // Dentist Model එකේ Constructor එකට අනුව Parameters 6ම ලබා දීම:
+                // Dentist(name, specialization, contactNumber, email, username, password)
+                Dentist dentist = new Dentist(dentistName, specialization, contactNumber, email, username, password);
+
+                // DentistDAO හි පවතින addDentist method එක භාවිතා කිරීම
+                boolean success = dentistDAO.addDentist(dentist);
 
                 if (success) {
-                    // සාර්ථක වූ විට Reception Dashboard එකට Redirect කිරීම
-                    response.sendRedirect("receptionDashboard.jsp?doctorStatus=success");
+                    response.sendRedirect("receptionistDashboard.jsp?status=doctor_added");
                 } else {
-                    response.sendRedirect("receptionDashboard.jsp?doctorStatus=error");
+                    response.sendRedirect("receptionistDashboard.jsp?status=doctor_add_failed");
                 }
             } else {
-                // Form Fields හිස්ව පැමිණි විට
-                response.sendRedirect("receptionDashboard.jsp?doctorStatus=empty");
+                response.sendRedirect("receptionistDashboard.jsp?status=missing_fields");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect("receptionDashboard.jsp?doctorStatus=error");
+            response.sendRedirect("receptionistDashboard.jsp?status=error");
         }
     }
 }

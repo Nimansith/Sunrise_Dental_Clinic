@@ -1,0 +1,95 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : Aug 16, 2026, 1:29:22 AM
+    Author     : Rusanda Nimansith
+*/
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #0284c7 !important;
+            font-size: 1.35rem;
+        }
+
+        .sidebar-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .bg-sky-light { background-color: #e0f2fe; color: #0284c7; }
+        .bg-amber-light { background-color: #fef3c7; color: #d97706; }
+        .bg-purple-light { background-color: #f3e8ff; color: #9333ea; }
+        .bg-teal-light { background-color: #ccfbf1; color: #0d9488; }
+
+        .btn-primary-custom {
+            background-color: #0284c7;
+            border: none;
+            color: white;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 10px 18px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: #0369a1;
+            color: white;
+        }
+
+        .nav-pills .nav-link {
+            color: #64748b;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 10px 18px;
+            margin-right: 8px;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: #0284c7;
+            color: #ffffff;
+        }
+
+        .table-custom {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-custom thead {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+        }
+  

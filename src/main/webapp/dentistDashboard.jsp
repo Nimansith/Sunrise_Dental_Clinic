@@ -8,11 +8,13 @@
 <%@page import="Models.User"%>
 <%
     // Session Verification Guard
-    User user = (User) session.getAttribute("user");
-    if (user == null || !"DENTIST".equalsIgnoreCase(user.getRole())) {
-        response.sendRedirect("login.jsp?error=unauthorized");
-        return;
-    }
+    String role = (String) session.getAttribute("role");
+Integer dentistId = (Integer) session.getAttribute("dentistId");
+
+if (role == null || !"DENTIST".equalsIgnoreCase(role)) {
+    response.sendRedirect("login.jsp?error=unauthorized");
+    return;
+}
 %>
 <!DOCTYPE html>
 <html lang="en">

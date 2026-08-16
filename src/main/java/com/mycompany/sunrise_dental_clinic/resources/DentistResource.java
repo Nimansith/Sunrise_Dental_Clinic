@@ -1,10 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.sunrise_dental_clinic.resources;
 
-import dao.DentistDAO;
+import DAO.DentistDAO;
 import Models.Dentist;
 
 import jakarta.ws.rs.*;
@@ -41,15 +37,15 @@ public class DentistResource {
         }
     }
 
-    // 3. POST: නව Dentist කෙනෙකු Register කිරීම
+    // 3. POST: නව Dentist කෙනෙකු Register කිරීම (username & password ඇතුළත්ව)
     // Postman URL: POST http://localhost:8080/sunrise_dental_clinic/api/dentists
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response registerDentist(Dentist dentist) {
-        if (dentist == null || dentist.getDentistName() == null) {
+        if (dentist == null || dentist.getDentistName() == null || dentist.getUsername() == null || dentist.getPassword() == null) {
             return Response.status(Response.Status.BAD_REQUEST)
-                           .entity("{\"error\": \"Invalid Dentist details\"}").build();
+                           .entity("{\"error\": \"Invalid Dentist details. Username and Password are required.\"}").build();
         }
 
         boolean success = dentistDAO.registerDentist(dentist);

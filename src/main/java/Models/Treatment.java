@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Models;
 
 public class Treatment {
@@ -10,10 +6,19 @@ public class Treatment {
     private String description;
     private double cost;
 
+    // Default Constructor
     public Treatment() {}
 
+    // Constructor with All Fields
     public Treatment(int treatmentId, String treatmentName, String description, double cost) {
         this.treatmentId = treatmentId;
+        this.treatmentName = treatmentName;
+        this.description = description;
+        this.cost = cost;
+    }
+
+    // Constructor without ID (New treatment creation)
+    public Treatment(String treatmentName, String description, double cost) {
         this.treatmentName = treatmentName;
         this.description = description;
         this.cost = cost;

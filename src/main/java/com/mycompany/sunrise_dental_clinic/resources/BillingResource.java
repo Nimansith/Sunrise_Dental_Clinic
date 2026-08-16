@@ -1,10 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.sunrise_dental_clinic.resources;
 
-import dao.BillDAO;
+import DAO.BillDAO;
 import Models.Bill;
 
 import jakarta.ws.rs.*;
@@ -12,13 +8,11 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 
-@Path("/billing")
+@Path("/bills")
 public class BillingResource {
 
-    private final BillDAO billDAO = new BillDAO();
+    private BillDAO billDAO = new BillDAO();
 
-    // 1. GET: සියලුම Bills, Patient Details ද සමඟ ලබා ගැනීම
-    // Postman: GET http://localhost:8080/sunrise_dental_clinic/api/billing
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllBills() {
@@ -26,8 +20,6 @@ public class BillingResource {
         return Response.ok(list).build();
     }
 
-    // 2. GET: ID එක මගින් Specific Bill එකක් ලබා ගැනීම
-    // Postman: GET http://localhost:8080/sunrise_dental_clinic/api/billing/1
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -35,33 +27,45 @@ public class BillingResource {
         Bill bill = billDAO.getBillById(id);
         if (bill != null) {
             return Response.ok(bill).build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("{\"error\": \"Bill not found\"}").build();
         }
-        return Response.status(Response.Status.NOT_FOUND)
-                       .entity("{\"error\": \"Bill not found\"}").build();
     }
 
-    // 3. POST: නව Bill එකක් Create කිරීම
-    // Postman: POST http://localhost:8080/sunrise_dental_clinic/api/billing
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createBill(Bill bill) {
+    public Response addBill(Bill bill) {
         if (bill == null || bill.getAppointmentId() <= 0) {
             return Response.status(Response.Status.BAD_REQUEST)
-                           .entity("{\"error\": \"Valid Appointment ID is required\"}").build();
+                           .entity("{\"error\": \"Invalid bill details. appointmentId is required.\"}").build();
         }
 
         boolean success = billDAO.addBill(bill);
         if (success) {
             return Response.status(Response.Status.CREATED)
-                           .entity("{\"message\": \"Bill created successfully!\"}").build();
+                           .entity("{\"message\": \"Bill generated successfully!\"}").build();
+        } else {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                           .entity("{\"error\": \"Failed to generate bill\"}").build();
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                       .entity("{\"error\": \"Failed to create bill. Ensure the appointment ID exists.\"}").build();
     }
 
-    // 4. DELETE: Bill එකක් Delete කිරීම
-    // Postman: DELETE http://localhost:8080/sunrise_dental_clinic/api/billing/1
+    // Payment Status එක Update කිරීම සදහා ( e.g., PUT /api/bills/1/pay )
+    @PUT
+    @Path("/{id}/pay")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response markAsPaid(@PathParam("id") int id) {
+        boolean success = billDAO.updatePaymentStatus(id, "PAID");
+        if (success) {
+            return Response.ok("{\"message\": \"Bill status updated to PAID successfully!\"}").build();
+        } else {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                           .entity("{\"error\": \"Failed to update payment status\"}").build();
+        }
+    }
+
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -69,8 +73,9 @@ public class BillingResource {
         boolean success = billDAO.deleteBill(id);
         if (success) {
             return Response.ok("{\"message\": \"Bill deleted successfully!\"}").build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("{\"error\": \"Bill not found or failed to delete\"}").build();
         }
-        return Response.status(Response.Status.NOT_FOUND)
-                       .entity("{\"error\": \"Bill not found or failed to delete\"}").build();
     }
 }

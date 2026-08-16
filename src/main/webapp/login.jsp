@@ -126,16 +126,26 @@
     </div>
 
     <div class="login-body">
-        <!-- Error Handling Alerts -->
+        <!-- Error & Status Handling Alerts -->
         <%
             String error = request.getParameter("error");
+            String status = request.getParameter("status");
 
             if ("invalid".equals(error)) {
         %>
             <div class="alert alert-danger d-flex align-items-center rounded-3 mb-4 p-3" role="alert">
                 <i class="fa-solid fa-circle-exclamation me-2 fs-5"></i>
                 <div class="small fw-semibold">
-                    Invalid username or password.
+                    Invalid username or password. Please try again.
+                </div>
+            </div>
+        <%
+            } else if ("dentist_not_found".equals(error)) {
+        %>
+            <div class="alert alert-warning d-flex align-items-center rounded-3 mb-4 p-3" role="alert">
+                <i class="fa-solid fa-user-doctor me-2 fs-5"></i>
+                <div class="small fw-semibold">
+                    Dentist profile not found for this account.
                 </div>
             </div>
         <%
@@ -144,7 +154,25 @@
             <div class="alert alert-warning d-flex align-items-center rounded-3 mb-4 p-3" role="alert">
                 <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
                 <div class="small fw-semibold">
-                    Invalid user role assigned.
+                    Unauthorized role assigned to your account.
+                </div>
+            </div>
+        <%
+            } else if ("unauthorized".equals(error) || "login_required".equals(error)) {
+        %>
+            <div class="alert alert-warning d-flex align-items-center rounded-3 mb-4 p-3" role="alert">
+                <i class="fa-solid fa-lock me-2 fs-5"></i>
+                <div class="small fw-semibold">
+                    Please log in first to access the dashboard.
+                </div>
+            </div>
+        <%
+            } else if ("logout".equals(status)) {
+        %>
+            <div class="alert alert-success d-flex align-items-center rounded-3 mb-4 p-3" role="alert">
+                <i class="fa-solid fa-circle-check me-2 fs-5"></i>
+                <div class="small fw-semibold">
+                    You have been successfully logged out.
                 </div>
             </div>
         <%
@@ -162,7 +190,8 @@
                     <input 
                         type="text" 
                         id="username"
-                        name="username" 
+                        name="username"
+                        autocomplete="off"
                         class="form-control border-start-0 rounded-end-3" 
                         placeholder="Enter username" 
                         required
@@ -180,6 +209,7 @@
                         type="password" 
                         id="password"
                         name="password" 
+                        autocomplete="off"
                         class="form-control border-start-0 rounded-end-3" 
                         placeholder="Enter password" 
                         required

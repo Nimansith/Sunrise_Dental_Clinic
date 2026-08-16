@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Models;
 
 import java.sql.Timestamp;
@@ -11,22 +7,40 @@ public class Appointment {
     private String patientName;
     private String address;
     private String contactNumber;
-    private String dentistName;
-    private String treatmentType;
+    private int dentistId;
+    private int treatmentId;
     private Timestamp appointmentDateTime;
+    private String status;
 
+    // Default Constructor
     public Appointment() {}
 
-    public Appointment(String patientName, String address, String contactNumber, String dentistName, String treatmentType, Timestamp appointmentDateTime) {
+    // Constructor with All Fields
+    public Appointment(int appointmentId, String patientName, String address, String contactNumber, 
+                       int dentistId, int treatmentId, Timestamp appointmentDateTime, String status) {
+        this.appointmentId = appointmentId;
         this.patientName = patientName;
         this.address = address;
         this.contactNumber = contactNumber;
-        this.dentistName = dentistName;
-        this.treatmentType = treatmentType;
+        this.dentistId = dentistId;
+        this.treatmentId = treatmentId;
         this.appointmentDateTime = appointmentDateTime;
+        this.status = status;
     }
 
-    // Getters & Setters
+    // Constructor without ID (New Appointment)
+    public Appointment(String patientName, String address, String contactNumber, 
+                       int dentistId, int treatmentId, Timestamp appointmentDateTime, String status) {
+        this.patientName = patientName;
+        this.address = address;
+        this.contactNumber = contactNumber;
+        this.dentistId = dentistId;
+        this.treatmentId = treatmentId;
+        this.appointmentDateTime = appointmentDateTime;
+        this.status = status;
+    }
+
+    // Getters and Setters
     public int getAppointmentId() { return appointmentId; }
     public void setAppointmentId(int appointmentId) { this.appointmentId = appointmentId; }
 
@@ -39,12 +53,15 @@ public class Appointment {
     public String getContactNumber() { return contactNumber; }
     public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber; }
 
-    public String getDentistName() { return dentistName; }
-    public void setDentistName(String dentistName) { this.dentistName = dentistName; }
+    public int getDentistId() { return dentistId; }
+    public void setDentistId(int dentistId) { this.dentistId = dentistId; }
 
-    public String getTreatmentType() { return treatmentType; }
-    public void setTreatmentType(String treatmentType) { this.treatmentType = treatmentType; }
+    public int getTreatmentId() { return treatmentId; }
+    public void setTreatmentId(int treatmentId) { this.treatmentId = treatmentId; }
 
     public Timestamp getAppointmentDateTime() { return appointmentDateTime; }
     public void setAppointmentDateTime(Timestamp appointmentDateTime) { this.appointmentDateTime = appointmentDateTime; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

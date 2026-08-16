@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Models;
 
 import java.sql.Timestamp;
@@ -12,19 +8,21 @@ public class Bill {
     private double consultationFee;
     private double treatmentCost;
     private double totalAmount;
+    private String paymentStatus; // UNPAID / PAID
     private Timestamp billDate;
-
-    // Table JOIN එකෙන් ගන්නා අමතර විස්තර
+    
+    // Display fields from JOIN queries
     private String patientName;
-    private String treatmentType;
+    private String treatmentName;
 
     public Bill() {}
 
-    public Bill(int appointmentId, double consultationFee, double treatmentCost, double totalAmount) {
+    public Bill(int appointmentId, double consultationFee, double treatmentCost, double totalAmount, String paymentStatus) {
         this.appointmentId = appointmentId;
         this.consultationFee = consultationFee;
         this.treatmentCost = treatmentCost;
         this.totalAmount = totalAmount;
+        this.paymentStatus = paymentStatus;
     }
 
     // Getters and Setters
@@ -43,12 +41,15 @@ public class Bill {
     public double getTotalAmount() { return totalAmount; }
     public void setTotalAmount(double totalAmount) { this.totalAmount = totalAmount; }
 
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+
     public Timestamp getBillDate() { return billDate; }
     public void setBillDate(Timestamp billDate) { this.billDate = billDate; }
 
     public String getPatientName() { return patientName; }
     public void setPatientName(String patientName) { this.patientName = patientName; }
 
-    public String getTreatmentType() { return treatmentType; }
-    public void setTreatmentType(String treatmentType) { this.treatmentType = treatmentType; }
+    public String getTreatmentName() { return treatmentName; }
+    public void setTreatmentName(String treatmentName) { this.treatmentName = treatmentName; }
 }

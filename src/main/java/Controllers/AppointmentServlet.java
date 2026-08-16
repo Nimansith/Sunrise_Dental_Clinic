@@ -1,6 +1,6 @@
 package Controllers;
 
-import dao.AppointmentDAO;
+import DAO.AppointmentDAO;
 import Models.Appointment;
 
 import jakarta.servlet.ServletException;
@@ -20,26 +20,53 @@ public class AppointmentServlet extends HttpServlet {
             String patientName = request.getParameter("patientName");
             String address = request.getParameter("address");
             String contactNumber = request.getParameter("contactNumber");
-            String dentistName = request.getParameter("dentistName");
-            String treatmentType = request.getParameter("treatmentType");
+            
+            // dentistId (int)
+            String dentistIdStr = request.getParameter("dentistId");
+            int dentistId = 0;
+            if (dentistIdStr != null && !dentistIdStr.trim().isEmpty()) {
+                dentistId = Integer.parseInt(dentistIdStr);
+            }
+
+            // treatmentId (int)
+            String treatmentIdStr = request.getParameter("treatmentId");
+            int treatmentId = 0;
+            if (treatmentIdStr != null && !treatmentIdStr.trim().isEmpty()) {
+                treatmentId = Integer.parseInt(treatmentIdStr);
+            }
+            
+            // Validation: dentistId සහ treatmentId 0 ට වැඩි විය යුතුය
+            if (dentistId <= 0 || treatmentId <= 0) {
+                System.err.println("Invalid Dentist ID or Treatment ID provided.");
+                response.sendRedirect("receptionistDashboard.jsp?status=error");
+                return;
+            }
+
+            // status (Default to "PENDING" if not provided)
+            String status = request.getParameter("status");
+            if (status == null || status.trim().isEmpty()) {
+                status = "PENDING";
+            }
+
             String dateTimeStr = request.getParameter("appointmentDateTime"); // HTML input: datetime-local
 
             // Input Validation & Timestamp Conversion
             Timestamp appointmentDateTime = null;
             if (dateTimeStr != null && !dateTimeStr.trim().isEmpty()) {
-                // HTML datetime-local format ("YYYY-MM-DDTHH:mm") -> MySQL Timestamp format ("YYYY-MM-DD HH:mm:00")
-                String formattedDate = dateTimeStr.replace("T", " ") + ":00";
+                String formattedDate = dateTimeStr.replace("T", " ");
+                if (formattedDate.length() == 16) {
+                    formattedDate += ":00";
+                }
                 appointmentDateTime = Timestamp.valueOf(formattedDate);
             }
 
-            // Create Appointment Object
-            Appointment appt = new Appointment(patientName, address, contactNumber, dentistName, treatmentType, appointmentDateTime);
+            // Create Appointment Object with updated fields
+            Appointment appt = new Appointment(patientName, address, contactNumber, dentistId, treatmentId, appointmentDateTime, status);
 
             // Save to DB
             boolean success = appointmentDAO.addAppointment(appt);
 
             if (success) {
-                // JSP එක බලන status=success එකට Redirect කිරීම
                 response.sendRedirect("receptionistDashboard.jsp?status=success");
             } else {
                 response.sendRedirect("receptionistDashboard.jsp?status=error");

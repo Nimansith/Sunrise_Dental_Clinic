@@ -1,10 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Controllers;
 
-import dao.AppointmentDAO;
+import DAO.AppointmentDAO;
 import Models.Appointment;
 
 import jakarta.servlet.ServletException;
@@ -28,8 +24,27 @@ public class ManageAppointmentServlet extends HttpServlet {
                 String patientName = request.getParameter("patientName");
                 String address = request.getParameter("address");
                 String contactNumber = request.getParameter("contactNumber");
-                String dentistName = request.getParameter("dentistName");
-                String treatmentType = request.getParameter("treatmentType");
+                
+                // dentistId (int)
+                String dentistIdStr = request.getParameter("dentistId");
+                int dentistId = 0;
+                if (dentistIdStr != null && !dentistIdStr.trim().isEmpty()) {
+                    dentistId = Integer.parseInt(dentistIdStr);
+                }
+
+                // treatmentId (int)
+                String treatmentIdStr = request.getParameter("treatmentId");
+                int treatmentId = 0;
+                if (treatmentIdStr != null && !treatmentIdStr.trim().isEmpty()) {
+                    treatmentId = Integer.parseInt(treatmentIdStr);
+                }
+
+                // status
+                String status = request.getParameter("status");
+                if (status == null || status.trim().isEmpty()) {
+                    status = "PENDING";
+                }
+
                 String dateTimeStr = request.getParameter("appointmentDateTime");
 
                 Timestamp appointmentDateTime = null;
@@ -41,8 +56,8 @@ public class ManageAppointmentServlet extends HttpServlet {
                     appointmentDateTime = Timestamp.valueOf(formattedDate);
                 }
 
-                Appointment appt = new Appointment(patientName, address, contactNumber, dentistName, treatmentType, appointmentDateTime);
-                appt.setAppointmentId(id);
+                // Updated Constructor Call with appointmentId
+                Appointment appt = new Appointment(id, patientName, address, contactNumber, dentistId, treatmentId, appointmentDateTime, status);
 
                 boolean success = appointmentDAO.updateAppointment(appt);
                 response.sendRedirect("receptionistDashboard.jsp?status=" + (success ? "updated" : "error"));

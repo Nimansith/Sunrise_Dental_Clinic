@@ -1,10 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.sunrise_dental_clinic.resources;
 
-import dao.TreatmentDAO;
+import DAO.TreatmentDAO;
 import Models.Treatment;
 
 import jakarta.ws.rs.*;
@@ -15,9 +11,9 @@ import java.util.List;
 @Path("/treatments")
 public class TreatmentResource {
 
-    private final TreatmentDAO treatmentDAO = new TreatmentDAO();
+    private TreatmentDAO treatmentDAO = new TreatmentDAO();
 
-    // 1. GET: සියලුම Treatments ලබා ගැනීම
+    // 1. GET: සියලුම Treatments ලැයිස්තුව ලබා ගැනීම
     // Postman: GET http://localhost:8080/sunrise_dental_clinic/api/treatments
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -26,7 +22,7 @@ public class TreatmentResource {
         return Response.ok(list).build();
     }
 
-    // 2. GET: ID එක මගින් Treatment එකක් සෙවීම
+    // 2. GET: ID එක මගින් Treatment එකක් ලබා ගැනීම
     // Postman: GET http://localhost:8080/sunrise_dental_clinic/api/treatments/1
     @GET
     @Path("/{id}")
@@ -35,48 +31,46 @@ public class TreatmentResource {
         Treatment treatment = treatmentDAO.getTreatmentById(id);
         if (treatment != null) {
             return Response.ok(treatment).build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("{\"error\": \"Treatment not found\"}").build();
         }
-        return Response.status(Response.Status.NOT_FOUND)
-                       .entity("{\"error\": \"Treatment not found\"}").build();
     }
 
-    // 3. POST: නව Treatment එකක් ඇතුළත් කිරීම
+    // 3. POST: අලුත් Treatment එකක් එකතු කිරීම
     // Postman: POST http://localhost:8080/sunrise_dental_clinic/api/treatments
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createTreatment(Treatment treatment) {
-        if (treatment == null || treatment.getTreatmentName() == null || treatment.getTreatmentName().trim().isEmpty()) {
+    public Response addTreatment(Treatment treatment) {
+        if (treatment == null || treatment.getTreatmentName() == null || treatment.getCost() <= 0) {
             return Response.status(Response.Status.BAD_REQUEST)
-                           .entity("{\"error\": \"Treatment Name is required\"}").build();
+                           .entity("{\"error\": \"Invalid Treatment details or cost\"}").build();
         }
 
         boolean success = treatmentDAO.addTreatment(treatment);
         if (success) {
             return Response.status(Response.Status.CREATED)
-                           .entity("{\"message\": \"Treatment created successfully!\"}").build();
+                           .entity("{\"message\": \"Treatment added successfully!\"}").build();
+        } else {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                           .entity("{\"error\": \"Failed to add treatment\"}").build();
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                       .entity("{\"error\": \"Failed to create treatment\"}").build();
     }
 
-    // 4. PUT: පවතින Treatment එකක් Update කිරීම
+    // 4. PUT: Treatment එකක් Update කිරීම
     // Postman: PUT http://localhost:8080/sunrise_dental_clinic/api/treatments
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateTreatment(Treatment treatment) {
-        if (treatment == null || treatment.getTreatmentId() <= 0) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                           .entity("{\"error\": \"Valid Treatment ID is required for update\"}").build();
-        }
-
         boolean success = treatmentDAO.updateTreatment(treatment);
         if (success) {
             return Response.ok("{\"message\": \"Treatment updated successfully!\"}").build();
+        } else {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                           .entity("{\"error\": \"Failed to update treatment\"}").build();
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                       .entity("{\"error\": \"Failed to update treatment\"}").build();
     }
 
     // 5. DELETE: Treatment එකක් Delete කිරීම
@@ -88,8 +82,9 @@ public class TreatmentResource {
         boolean success = treatmentDAO.deleteTreatment(id);
         if (success) {
             return Response.ok("{\"message\": \"Treatment deleted successfully!\"}").build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("{\"error\": \"Treatment not found or failed to delete\"}").build();
         }
-        return Response.status(Response.Status.NOT_FOUND)
-                       .entity("{\"error\": \"Treatment not found or failed to delete\"}").build();
     }
 }
