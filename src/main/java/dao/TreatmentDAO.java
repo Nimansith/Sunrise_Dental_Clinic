@@ -4,8 +4,8 @@
  */
 package dao;
 
-import Models.Treatment;
-import Utils.DatabaseConnection;
+import models.Treatment;
+import utils.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;

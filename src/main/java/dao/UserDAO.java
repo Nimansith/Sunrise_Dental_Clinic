@@ -1,7 +1,7 @@
 package dao;
 
-import Models.User;
-import Utils.DatabaseConnection;
+import models.User;
+import utils.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
 package com.mycompany.sunrise_dental_clinic.resources;
 
-import DAO.AppointmentDAO;
-import Models.Appointment;
+import dao.AppointmentDAO;
+import models.Appointment;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;

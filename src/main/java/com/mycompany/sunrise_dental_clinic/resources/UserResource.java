@@ -4,8 +4,8 @@
  */
 package com.mycompany.sunrise_dental_clinic.resources;
 
-import DAO.UserDAO;
-import Models.User;
+import dao.UserDAO;
+import models.User;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;

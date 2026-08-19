@@ -1,7 +1,7 @@
 package dao;
 
-import Models.Appointment;
-import Utils.DatabaseConnection;
+import models.Appointment;
+import utils.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -11,16 +11,17 @@ public class AppointmentDAO {
 
     // 1. Insert New Appointment (Create)
     public boolean addAppointment(Appointment appt) {
-        String sql = "INSERT INTO appointments (patient_name, address, contact_number, dentist_name, treatment_type, appointment_date_time) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO appointments (patient_name, address, contact_number, dentist_id, treatment_id, appointment_date_time, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, appt.getPatientName());
             stmt.setString(2, appt.getAddress());
             stmt.setString(3, appt.getContactNumber());
-            stmt.setString(4, appt.getDentistName());
-            stmt.setString(5, appt.getTreatmentType());
+            stmt.setInt(4, appt.getDentistId());
+            stmt.setInt(5, appt.getTreatmentId());
             stmt.setTimestamp(6, appt.getAppointmentDateTime());
+            stmt.setString(7, (appt.getStatus() != null && !appt.getStatus().isEmpty()) ? appt.getStatus() : "PENDING");
 
             return stmt.executeUpdate() > 0;
         } catch (Exception e) {
@@ -65,20 +66,20 @@ public class AppointmentDAO {
         return appt;
     }
 
-    // 4. Update Appointment (Update)
+    // 4. Update Full Appointment Details (Update)
     public boolean updateAppointment(Appointment appt) {
-        // column name එක appointment_date_time ලෙස නිවැරදි කර ඇත
-        String sql = "UPDATE appointments SET patient_name=?, address=?, contact_number=?, dentist_name=?, treatment_type=?, appointment_date_time=? WHERE appointment_id=?";
+        String sql = "UPDATE appointments SET patient_name=?, address=?, contact_number=?, dentist_id=?, treatment_id=?, appointment_date_time=?, status=? WHERE appointment_id=?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, appt.getPatientName());
             ps.setString(2, appt.getAddress());
             ps.setString(3, appt.getContactNumber());
-            ps.setString(4, appt.getDentistName());
-            ps.setString(5, appt.getTreatmentType());
+            ps.setInt(4, appt.getDentistId());
+            ps.setInt(5, appt.getTreatmentId());
             ps.setTimestamp(6, appt.getAppointmentDateTime());
-            ps.setInt(7, appt.getAppointmentId());
+            ps.setString(7, appt.getStatus());
+            ps.setInt(8, appt.getAppointmentId());
 
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -87,7 +88,23 @@ public class AppointmentDAO {
         }
     }
 
-    // 5. Delete Appointment (Delete)
+    // 5. Update ONLY Appointment Status (New Method for Dentist Action)
+    public boolean updateAppointmentStatus(int appointmentId, String status) {
+        String sql = "UPDATE appointments SET status = ? WHERE appointment_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            ps.setInt(2, appointmentId);
+
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // 6. Delete Appointment (Delete)
     public boolean deleteAppointment(int appointmentId) {
         String sql = "DELETE FROM appointments WHERE appointment_id=?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -101,16 +118,55 @@ public class AppointmentDAO {
         }
     }
 
-    // Code duplication අවම කිරීම සඳහා සාදන ලද Helper Method එකක්
+    // 7. Dentist කෙනෙකුගේ සියලුම Appointments ලබා ගැනීම
+    public List<Appointment> getAppointmentsByDentistId(int dentistId) {
+        List<Appointment> list = new ArrayList<>();
+        String sql = "SELECT * FROM appointments WHERE dentist_id = ? ORDER BY appointment_date_time DESC";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, dentistId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToAppointment(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // 8. Dentist කෙනෙකුගේ අද දිනට අදාළ Appointments ලබා ගැනීම
+    public List<Appointment> getTodayAppointmentsByDentistId(int dentistId) {
+        List<Appointment> list = new ArrayList<>();
+        String sql = "SELECT * FROM appointments WHERE dentist_id = ? AND DATE(appointment_date_time) = CURDATE() ORDER BY appointment_date_time ASC";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, dentistId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToAppointment(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // Helper Method for ResultSet Mapping
     private Appointment mapResultSetToAppointment(ResultSet rs) throws SQLException {
         Appointment appt = new Appointment();
         appt.setAppointmentId(rs.getInt("appointment_id"));
         appt.setPatientName(rs.getString("patient_name"));
         appt.setAddress(rs.getString("address"));
         appt.setContactNumber(rs.getString("contact_number"));
-        appt.setDentistName(rs.getString("dentist_name"));
-        appt.setTreatmentType(rs.getString("treatment_type"));
+        appt.setDentistId(rs.getInt("dentist_id"));
+        appt.setTreatmentId(rs.getInt("treatment_id"));
         appt.setAppointmentDateTime(rs.getTimestamp("appointment_date_time"));
+        appt.setStatus(rs.getString("status"));
         return appt;
     }
 }

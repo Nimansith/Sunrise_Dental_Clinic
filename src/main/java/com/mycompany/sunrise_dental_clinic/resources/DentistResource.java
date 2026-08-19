@@ -1,7 +1,7 @@
 package com.mycompany.sunrise_dental_clinic.resources;
 
-import DAO.DentistDAO;
-import Models.Dentist;
+import dao.DentistDAO;
+import models.Dentist;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
