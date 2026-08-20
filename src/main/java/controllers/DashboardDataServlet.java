@@ -3,10 +3,14 @@ package controllers;
 import dao.AppointmentDAO;
 import dao.BillDAO;
 import dao.DentistDAO;
+import dao.PatientDAO;
+import dao.StaffDAO;
 import dao.TreatmentDAO;
 import models.Appointment;
 import models.Bill;
 import models.Dentist;
+import models.Patient;
+import models.Staff;
 import models.Treatment;
 
 import jakarta.servlet.ServletException;
@@ -23,6 +27,8 @@ public class DashboardDataServlet extends HttpServlet {
     private final AppointmentDAO appointmentDAO = new AppointmentDAO();
     private final BillDAO billDAO = new BillDAO();
     private final TreatmentDAO treatmentDAO = new TreatmentDAO();
+    private final PatientDAO patientDAO = new PatientDAO();
+    private final StaffDAO staffDAO = new StaffDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -36,6 +42,8 @@ public class DashboardDataServlet extends HttpServlet {
             List<Appointment> appointments = appointmentDAO.getAllAppointments();
             List<Bill> bills = billDAO.getAllBills();
             List<Treatment> treatments = treatmentDAO.getAllTreatments();
+            List<Patient> patients = patientDAO.getAllPatients();
+            List<Staff> staffMembers = staffDAO.getAllStaff();
 
             StringBuilder json = new StringBuilder();
             json.append("{");
@@ -45,27 +53,36 @@ public class DashboardDataServlet extends HttpServlet {
             if (dentists != null) {
                 for (int i = 0; i < dentists.size(); i++) {
                     Dentist d = dentists.get(i);
-                    json.append(String.format(
-                        "{\"dentistId\":%d, \"dentistName\":\"%s\", \"specialization\":\"%s\", \"contactNumber\":\"%s\", \"email\":\"%s\", \"username\":\"%s\"}",
-                        d.getDentistId(), escapeJson(d.getDentistName()), escapeJson(d.getSpecialization()), 
-                        escapeJson(d.getContactNumber()), escapeJson(d.getEmail()), escapeJson(d.getUsername())
-                    ));
+                    json.append("{")
+                        .append("\"dentistId\":").append(d.getDentistId()).append(",")
+                        .append("\"dentistName\":\"").append(escapeJson(d.getDentistName())).append("\",")
+                        .append("\"specialization\":\"").append(escapeJson(d.getSpecialization())).append("\",")
+                        .append("\"contactNumber\":\"").append(escapeJson(d.getContactNumber())).append("\",")
+                        .append("\"email\":\"").append(escapeJson(d.getEmail())).append("\",")
+                        .append("\"username\":\"").append(escapeJson(d.getUsername())).append("\"")
+                        .append("}");
                     if (i < dentists.size() - 1) json.append(",");
                 }
             }
             json.append("],");
 
-            // 2. Appointments JSON
+            // 2. Appointments JSON (dentistName එකතු කර ඇත)
             json.append("\"appointmentList\":[");
             if (appointments != null) {
                 for (int i = 0; i < appointments.size(); i++) {
                     Appointment a = appointments.get(i);
-                    json.append(String.format(
-                        "{\"appointmentId\":%d, \"patientName\":\"%s\", \"address\":\"%s\", \"contactNumber\":\"%s\", \"dentistId\":%d, \"treatmentId\":%d, \"appointmentDateTime\":\"%s\", \"status\":\"%s\"}",
-                        a.getAppointmentId(), escapeJson(a.getPatientName()), escapeJson(a.getAddress()), 
-                        escapeJson(a.getContactNumber()), a.getDentistId(), a.getTreatmentId(), 
-                        a.getAppointmentDateTime() != null ? a.getAppointmentDateTime().toString() : "", escapeJson(a.getStatus())
-                    ));
+                    String apptDateTime = a.getAppointmentDateTime() != null ? a.getAppointmentDateTime().toString() : "";
+                    json.append("{")
+                        .append("\"appointmentId\":").append(a.getAppointmentId()).append(",")
+                        .append("\"patientName\":\"").append(escapeJson(a.getPatientName())).append("\",")
+                        .append("\"address\":\"").append(escapeJson(a.getAddress())).append("\",")
+                        .append("\"contactNumber\":\"").append(escapeJson(a.getContactNumber())).append("\",")
+                        .append("\"dentistId\":").append(a.getDentistId()).append(",")
+                        .append("\"dentistName\":\"").append(escapeJson(a.getDentistName())).append("\",") // FIX: Dentist Name එකතු කළා
+                        .append("\"treatmentId\":").append(a.getTreatmentId()).append(",")
+                        .append("\"appointmentDateTime\":\"").append(escapeJson(apptDateTime)).append("\",")
+                        .append("\"status\":\"").append(escapeJson(a.getStatus())).append("\"")
+                        .append("}");
                     if (i < appointments.size() - 1) json.append(",");
                 }
             }
@@ -76,12 +93,17 @@ public class DashboardDataServlet extends HttpServlet {
             if (bills != null) {
                 for (int i = 0; i < bills.size(); i++) {
                     Bill b = bills.get(i);
-                    json.append(String.format(
-                        "{\"billId\":%d, \"appointmentId\":%d, \"patientName\":\"%s\", \"treatmentName\":\"%s\", \"consultationFee\":%.2f, \"treatmentCost\":%.2f, \"totalAmount\":%.2f, \"billDate\":\"%s\"}",
-                        b.getBillId(), b.getAppointmentId(), escapeJson(b.getPatientName()), 
-                        escapeJson(b.getTreatmentName()), b.getConsultationFee(), b.getTreatmentCost(), 
-                        b.getTotalAmount(), b.getBillDate() != null ? b.getBillDate().toString() : ""
-                    ));
+                    String billDate = b.getBillDate() != null ? b.getBillDate().toString() : "";
+                    json.append("{")
+                        .append("\"billId\":").append(b.getBillId()).append(",")
+                        .append("\"appointmentId\":").append(b.getAppointmentId()).append(",")
+                        .append("\"patientName\":\"").append(escapeJson(b.getPatientName())).append("\",")
+                        .append("\"treatmentName\":\"").append(escapeJson(b.getTreatmentName())).append("\",")
+                        .append("\"consultationFee\":").append(b.getConsultationFee()).append(",")
+                        .append("\"treatmentCost\":").append(b.getTreatmentCost()).append(",")
+                        .append("\"totalAmount\":").append(b.getTotalAmount()).append(",")
+                        .append("\"billDate\":\"").append(escapeJson(billDate)).append("\"")
+                        .append("}");
                     if (i < bills.size() - 1) json.append(",");
                 }
             }
@@ -92,25 +114,67 @@ public class DashboardDataServlet extends HttpServlet {
             if (treatments != null) {
                 for (int i = 0; i < treatments.size(); i++) {
                     Treatment t = treatments.get(i);
-                    json.append(String.format(
-                        "{\"treatmentId\":%d, \"treatmentName\":\"%s\"}",
-                        t.getTreatmentId(), escapeJson(t.getTreatmentName())
-                    ));
+                    json.append("{")
+                        .append("\"treatmentId\":").append(t.getTreatmentId()).append(",")
+                        .append("\"treatmentName\":\"").append(escapeJson(t.getTreatmentName())).append("\"")
+                        .append("}");
                     if (i < treatments.size() - 1) json.append(",");
+                }
+            }
+            json.append("],");
+
+            // 5. Patients JSON
+            json.append("\"patientList\":[");
+            if (patients != null) {
+                for (int i = 0; i < patients.size(); i++) {
+                    Patient p = patients.get(i);
+                    json.append("{")
+                        .append("\"patientId\":").append(p.getPatientId()).append(",")
+                        .append("\"patientName\":\"").append(escapeJson(p.getPatientName())).append("\",")
+                        .append("\"contactNumber\":\"").append(escapeJson(p.getContactNumber())).append("\",")
+                        .append("\"email\":\"").append(escapeJson(p.getEmail())).append("\",")
+                        .append("\"gender\":\"").append(escapeJson(p.getGender())).append("\",")
+                        .append("\"address\":\"").append(escapeJson(p.getAddress())).append("\"")
+                        .append("}");
+                    if (i < patients.size() - 1) json.append(",");
+                }
+            }
+            json.append("],");
+
+            // 6. Staff JSON
+            json.append("\"staffList\":[");
+            if (staffMembers != null) {
+                for (int i = 0; i < staffMembers.size(); i++) {
+                    Staff s = staffMembers.get(i);
+                    json.append("{")
+                        .append("\"staffId\":").append(s.getStaffId()).append(",")
+                        .append("\"staffName\":\"").append(escapeJson(s.getStaffName())).append("\",")
+                        .append("\"role\":\"").append(escapeJson(s.getRole())).append("\",")
+                        .append("\"contactNumber\":\"").append(escapeJson(s.getContactNumber())).append("\",")
+                        .append("\"email\":\"").append(escapeJson(s.getEmail())).append("\",")
+                        .append("\"username\":\"").append(escapeJson(s.getUsername())).append("\"")
+                        .append("}");
+                    if (i < staffMembers.size() - 1) json.append(",");
                 }
             }
             json.append("]");
 
             json.append("}");
+            
             out.print(json.toString());
             out.flush();
         } catch (Exception e) {
             e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
     private String escapeJson(String input) {
         if (input == null) return "";
-        return input.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
+        return input.replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("\n", "\\n")
+                    .replace("\r", "\\r")
+                    .replace("\t", "\\t");
     }
 }

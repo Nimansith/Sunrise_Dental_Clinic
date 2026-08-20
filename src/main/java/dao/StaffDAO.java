@@ -12,7 +12,6 @@ import java.util.List;
 
 public class StaffDAO {
 
-    // 1. Authenticate Staff Member (Login)
     public Staff authenticateStaff(String username, String password) {
         String query = "SELECT * FROM staff WHERE username = ? AND password = ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -32,7 +31,6 @@ public class StaffDAO {
         return null;
     }
 
-    // 2. Get All Staff Members
     public List<Staff> getAllStaff() {
         List<Staff> staffList = new ArrayList<>();
         String query = "SELECT * FROM staff";
@@ -50,7 +48,6 @@ public class StaffDAO {
         return staffList;
     }
 
-    // 3. Get Staff Member by ID
     public Staff getStaffById(int id) {
         String query = "SELECT * FROM staff WHERE staff_id = ?";
 
@@ -70,17 +67,18 @@ public class StaffDAO {
         return null;
     }
 
-    // 4. Register / Insert New Staff Member
     public boolean registerStaff(Staff staff) {
-        String query = "INSERT INTO staff (username, password, full_name, email) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO staff (username, password, staff_name, role, email, contact_number) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
             pstmt.setString(1, staff.getUsername());
             pstmt.setString(2, staff.getPassword());
-            pstmt.setString(3, staff.getFullName());
-            pstmt.setString(4, staff.getEmail());
+            pstmt.setString(3, staff.getStaffName());
+            pstmt.setString(4, staff.getRole());
+            pstmt.setString(5, staff.getEmail());
+            pstmt.setString(6, staff.getContactNumber());
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -89,18 +87,19 @@ public class StaffDAO {
         return false;
     }
 
-    // 5. Update Staff Details
     public boolean updateStaff(Staff staff) {
-        String query = "UPDATE staff SET username = ?, password = ?, full_name = ?, email = ? WHERE staff_id = ?";
+        String query = "UPDATE staff SET username = ?, password = ?, staff_name = ?, role = ?, email = ?, contact_number = ? WHERE staff_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
             pstmt.setString(1, staff.getUsername());
             pstmt.setString(2, staff.getPassword());
-            pstmt.setString(3, staff.getFullName());
-            pstmt.setString(4, staff.getEmail());
-            pstmt.setInt(5, staff.getStaffId());
+            pstmt.setString(3, staff.getStaffName());
+            pstmt.setString(4, staff.getRole());
+            pstmt.setString(5, staff.getEmail());
+            pstmt.setString(6, staff.getContactNumber());
+            pstmt.setInt(7, staff.getStaffId());
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -109,7 +108,6 @@ public class StaffDAO {
         return false;
     }
 
-    // 6. Delete Staff Member
     public boolean deleteStaff(int id) {
         String query = "DELETE FROM staff WHERE staff_id = ?";
 
@@ -125,14 +123,15 @@ public class StaffDAO {
         return false;
     }
 
-    // Helper method to map ResultSet rows to Staff object
     private Staff extractStaffFromResultSet(ResultSet rs) throws SQLException {
         return new Staff(
             rs.getInt("staff_id"),
             rs.getString("username"),
             rs.getString("password"),
-            rs.getString("full_name"),
-            rs.getString("email")
+            rs.getString("staff_name"),
+            rs.getString("role"),
+            rs.getString("email"),
+            rs.getString("contact_number")
         );
     }
 }

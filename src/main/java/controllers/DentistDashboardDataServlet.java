@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package controllers;
 
 import dao.AppointmentDAO;
@@ -46,7 +42,13 @@ public class DentistDashboardDataServlet extends HttpServlet {
 
             StringBuilder json = new StringBuilder();
             json.append("{");
+            
+            // Profile Modal එකට අවශ්‍ය Dentist Details එකතු කර ඇත
+            json.append("\"dentistId\":").append(dentist.getDentistId()).append(",");
             json.append("\"dentistName\":\"").append(escapeJson(dentist.getDentistName())).append("\",");
+            json.append("\"specialization\":\"").append(escapeJson(dentist.getSpecialization())).append("\",");
+            json.append("\"contactNumber\":\"").append(escapeJson(dentist.getContactNumber())).append("\",");
+            json.append("\"email\":\"").append(escapeJson(dentist.getEmail())).append("\",");
             json.append("\"role\":\"").append(escapeJson(role)).append("\",");
 
             // Today's Appointments

@@ -42,7 +42,7 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("loggedUser", staff);
             session.setAttribute("staffId", staff.getStaffId());
             session.setAttribute("username", staff.getUsername());
-            session.setAttribute("fullName", staff.getFullName());
+            session.setAttribute("fullName", staff.getStaffName());
             session.setAttribute("role", "RECEPTIONIST");
 
             response.sendRedirect("Staff_Dashboard.html");

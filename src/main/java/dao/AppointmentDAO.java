@@ -11,17 +11,24 @@ public class AppointmentDAO {
 
     // 1. Insert New Appointment (Create)
     public boolean addAppointment(Appointment appt) {
-        String sql = "INSERT INTO appointments (patient_name, address, contact_number, dentist_id, treatment_id, appointment_date_time, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO appointments (patient_id, patient_name, address, contact_number, dentist_id, dentist_name, treatment_id, appointment_date_time, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, appt.getPatientName());
-            stmt.setString(2, appt.getAddress());
-            stmt.setString(3, appt.getContactNumber());
-            stmt.setInt(4, appt.getDentistId());
-            stmt.setInt(5, appt.getTreatmentId());
-            stmt.setTimestamp(6, appt.getAppointmentDateTime());
-            stmt.setString(7, (appt.getStatus() != null && !appt.getStatus().isEmpty()) ? appt.getStatus() : "PENDING");
+            if (appt.getPatientId() != null && appt.getPatientId() > 0) {
+                stmt.setInt(1, appt.getPatientId());
+            } else {
+                stmt.setNull(1, Types.INTEGER);
+            }
+
+            stmt.setString(2, appt.getPatientName());
+            stmt.setString(3, appt.getAddress());
+            stmt.setString(4, appt.getContactNumber());
+            stmt.setInt(5, appt.getDentistId());
+            stmt.setString(6, appt.getDentistName());
+            stmt.setInt(7, appt.getTreatmentId());
+            stmt.setTimestamp(8, appt.getAppointmentDateTime());
+            stmt.setString(9, (appt.getStatus() != null && !appt.getStatus().isEmpty()) ? appt.getStatus() : "PENDING");
 
             return stmt.executeUpdate() > 0;
         } catch (Exception e) {
@@ -68,18 +75,25 @@ public class AppointmentDAO {
 
     // 4. Update Full Appointment Details (Update)
     public boolean updateAppointment(Appointment appt) {
-        String sql = "UPDATE appointments SET patient_name=?, address=?, contact_number=?, dentist_id=?, treatment_id=?, appointment_date_time=?, status=? WHERE appointment_id=?";
+        String sql = "UPDATE appointments SET patient_id=?, patient_name=?, address=?, contact_number=?, dentist_id=?, dentist_name=?, treatment_id=?, appointment_date_time=?, status=? WHERE appointment_id=?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, appt.getPatientName());
-            ps.setString(2, appt.getAddress());
-            ps.setString(3, appt.getContactNumber());
-            ps.setInt(4, appt.getDentistId());
-            ps.setInt(5, appt.getTreatmentId());
-            ps.setTimestamp(6, appt.getAppointmentDateTime());
-            ps.setString(7, appt.getStatus());
-            ps.setInt(8, appt.getAppointmentId());
+            if (appt.getPatientId() != null && appt.getPatientId() > 0) {
+                ps.setInt(1, appt.getPatientId());
+            } else {
+                ps.setNull(1, Types.INTEGER);
+            }
+
+            ps.setString(2, appt.getPatientName());
+            ps.setString(3, appt.getAddress());
+            ps.setString(4, appt.getContactNumber());
+            ps.setInt(5, appt.getDentistId());
+            ps.setString(6, appt.getDentistName());
+            ps.setInt(7, appt.getTreatmentId());
+            ps.setTimestamp(8, appt.getAppointmentDateTime());
+            ps.setString(9, appt.getStatus());
+            ps.setInt(10, appt.getAppointmentId());
 
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -88,7 +102,7 @@ public class AppointmentDAO {
         }
     }
 
-    // 5. Update ONLY Appointment Status (New Method for Dentist Action)
+    // 5. Update ONLY Appointment Status
     public boolean updateAppointmentStatus(int appointmentId, String status) {
         String sql = "UPDATE appointments SET status = ? WHERE appointment_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -160,10 +174,15 @@ public class AppointmentDAO {
     private Appointment mapResultSetToAppointment(ResultSet rs) throws SQLException {
         Appointment appt = new Appointment();
         appt.setAppointmentId(rs.getInt("appointment_id"));
+        
+        int pId = rs.getInt("patient_id");
+        appt.setPatientId(rs.wasNull() ? null : pId);
+        
         appt.setPatientName(rs.getString("patient_name"));
         appt.setAddress(rs.getString("address"));
         appt.setContactNumber(rs.getString("contact_number"));
         appt.setDentistId(rs.getInt("dentist_id"));
+        appt.setDentistName(rs.getString("dentist_name")); // ResultSet එකෙන් Dentist Name එක ලබා ගැනීම
         appt.setTreatmentId(rs.getInt("treatment_id"));
         appt.setAppointmentDateTime(rs.getTimestamp("appointment_date_time"));
         appt.setStatus(rs.getString("status"));

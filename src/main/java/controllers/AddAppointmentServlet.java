@@ -15,34 +15,33 @@ public class AddAppointmentServlet extends HttpServlet {
     private final AppointmentDAO appointmentDAO = new AppointmentDAO();
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.sendRedirect("Staff_Dashboard.html");
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html; charset=UTF-8");
 
         try {
+            // Patient details parsing
+            String patientIdStr = request.getParameter("patientId");
+            Integer patientId = (patientIdStr != null && !patientIdStr.trim().isEmpty()) ? Integer.parseInt(patientIdStr.trim()) : null;
+
             String patientName = request.getParameter("patientName");
             String address = request.getParameter("address");
             String contactNumber = request.getParameter("contactNumber");
 
+            // Dentist details parsing
             String dentistIdStr = request.getParameter("dentistId");
-            int dentistId = 0;
-            if (dentistIdStr != null && !dentistIdStr.trim().isEmpty()) {
-                dentistId = Integer.parseInt(dentistIdStr.trim());
-            }
+            int dentistId = (dentistIdStr != null && !dentistIdStr.trim().isEmpty()) ? Integer.parseInt(dentistIdStr.trim()) : 0;
+            String dentistName = request.getParameter("dentistName"); // Dentist Name ලබා ගැනීම
 
+            // Treatment Foreign Keys validation
             String treatmentIdStr = request.getParameter("treatmentId");
-            int treatmentId = 0;
-            if (treatmentIdStr != null && !treatmentIdStr.trim().isEmpty()) {
-                treatmentId = Integer.parseInt(treatmentIdStr.trim());
-            }
+            int treatmentId = (treatmentIdStr != null && !treatmentIdStr.trim().isEmpty()) ? Integer.parseInt(treatmentIdStr.trim()) : 0;
 
             String dateTimeStr = request.getParameter("appointmentDateTime");
 
+            // Basic Input Checking
             if (dentistId <= 0 || treatmentId <= 0 || dateTimeStr == null || dateTimeStr.trim().isEmpty()) {
                 response.sendRedirect("Staff_Dashboard.html?status=error");
                 return;
@@ -53,13 +52,15 @@ public class AddAppointmentServlet extends HttpServlet {
                 status = "PENDING";
             }
 
+            // Convert HTML5 datetime-local string to Timestamp
             String formattedDate = dateTimeStr.replace("T", " ");
             if (formattedDate.length() == 16) {
                 formattedDate += ":00";
             }
             Timestamp appointmentDateTime = Timestamp.valueOf(formattedDate);
 
-            Appointment appt = new Appointment(patientName, address, contactNumber, dentistId, treatmentId, appointmentDateTime, status);
+            // Updated constructor call with dentistName
+            Appointment appt = new Appointment(patientId, patientName, address, contactNumber, dentistId, dentistName, treatmentId, appointmentDateTime, status);
             boolean success = appointmentDAO.addAppointment(appt);
 
             if (success) {
